@@ -17,6 +17,7 @@ app.use(express.static(__dirname + "/public"));
 // Set the views directory to the "views" folder
 
 // Set up a basic route to render an EJS template
+
 app.get("/", (req, res) => {
   res.render("login");
 });
