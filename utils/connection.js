@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const db_url = "mongodb://127.0.0.1:27017/Lab89DB";
+const db_url = "mongodb://127.0.0.1:27017/Final";
 
 const connectDB = async () => {
   try {
