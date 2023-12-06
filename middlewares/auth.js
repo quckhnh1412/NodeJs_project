@@ -20,4 +20,26 @@ const isLogout = async (req, res, next) => {
     console.log(e.message);
   }
 };
-module.exports = { isLogin, isLogout };
+const isLoginAdmin = async (req, res, next) => {
+  try {
+    if (req.session.user === "admin") {
+    } else {
+      res.redirect("/admin/");
+    }
+    next();
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+
+const isLogoutAdmin = async (req, res, next) => {
+  try {
+    if (req.session.user) {
+      res.redirect("/admin/home");
+    }
+    next();
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+module.exports = { isLogin, isLogout, isLoginAdmin, isLogoutAdmin };

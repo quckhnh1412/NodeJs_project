@@ -1,5 +1,9 @@
 const User = require("../models/User");
+
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+// Salesperson accounts with expiration timestamps
+
 const loadRegister = async (req, res) => {
   try {
     res.render("register");
@@ -7,53 +11,35 @@ const loadRegister = async (req, res) => {
     console.log(e.message);
   }
 };
-const register = async (req, res) => {
-  try {
-    // Check if email already exists in the database
-    const existingUser = await User.findOne({ email: req.body.email });
-
-    if (existingUser) {
-      // If email already exists, render the register page with an error message
-      return res.render("register", {
-        message: "Email already exists. Please use a different email.",
-      });
-    }
-    const passwordH = await bcrypt.hash(req.body.password, 10);
-    const newUser = new User({
-      name: req.body.name,
-      email: req.body.email,
-      imageUrl: "images/" + req.file.filename,
-      password: passwordH,
-    });
-    await newUser.save();
-    res.render("register", { message: "Successful!!" });
-  } catch (e) {
-    console.log(e.message);
-  }
-};
 
 const loadLogin = async (req, res) => {
   try {
-    res.render("login");
+    res.render("salesLogin");
   } catch (e) {
     console.log(e.message);
   }
 };
 const login = async (req, res) => {
   try {
-    const email = req.body.email;
+    const username = req.body.username;
     const password = req.body.password;
-    const user = await User.findOne({ email: email });
-    if (user) {
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (passwordMatch) {
-        req.session.user = user;
-        res.redirect("/home");
+    const existingUser = await User.findOne({
+      username: username,
+    });
+    if (existingUser) {
+      if (!existingUser.is_changed_password) {
+        console.log(existingUser.username);
+        //const passwordMatch = await bcrypt.compare(password, admin.password);
+        res.render("salesLogin", {
+          message:
+            "please change password first when click the link sent via email",
+        });
       } else {
-        res.render("login", { message: "password invalid" });
+        req.session.user = existingUser;
+        res.redirect("/home");
       }
     } else {
-      res.render("login", { message: "email and password invalid" });
+      res.render("salesLogin", { message: "email and password invalid" });
     }
   } catch (e) {
     console.log(e.message);
@@ -69,18 +55,63 @@ const logout = async (req, res) => {
 };
 const loadHome = async (req, res) => {
   try {
-    var users = await User.find({ _id: { $nin: [req.session.user._id] } });
-    res.render("index", { user: req.session.user, users: users });
+    //var users = await Admin.find({ _id: { $nin: [req.session.user._id] } });
+    res.render("index", { user: req.session.user });
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+
+const loginWithToken = async (req, res) => {
+  try {
+    const existingUser = await User.findOne({ token: req.query.token });
+    expiration_time = existingUser.expiration_time;
+    // Check if the token exists and is not expired
+    if (expiration_time > Date.now()) {
+      req.session.user = existingUser;
+      // Render the login page (you can customize this page using Handlebars)
+      existingUser.token = null;
+      existingUser.status = "Active";
+      existingUser.expiration_time = null;
+      existingUser.save();
+      res.render("sales_change_password");
+    } else {
+      res
+        .status(401)
+        .send("Please login by clicking on the link in your email.");
+    }
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+
+const changeSalesPasswordFirstLogin = async (req, res) => {
+  try {
+    const existingUser = await User.findOne({
+      username: req.session.user.username,
+    });
+    token = existingUser.token;
+    // Check if the token exists and is not expired
+    if (token == null) {
+      existingUser.password = req.body.password;
+      existingUser.is_changed_password = true;
+      existingUser.save();
+      res.render("index");
+    } else {
+      res
+        .status(401)
+        .send("Please login by clicking on the link in your email.");
+    }
   } catch (e) {
     console.log(e.message);
   }
 };
 
 module.exports = {
-  loadRegister,
-  register,
   loadLogin,
   login,
   loadHome,
   logout,
+  loginWithToken,
+  changeSalesPasswordFirstLogin,
 };

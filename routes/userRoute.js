@@ -12,7 +12,6 @@ userRoute.use(bodyParser.json());
 userRoute.use(session({ secret: SESSION_SECRET }));
 userRoute.use(bodyParser.urlencoded({ extended: true }));
 
-// Set the view engine to EJS
 const hbs = exphbs.create({
   defaultLayout: "main",
   extname: "handlebars", // Specify the extension for handlebars files
@@ -38,16 +37,14 @@ const upload = multer({ storage: storage });
 const userController = require("../controllers/userController");
 const auth = require("../middlewares/auth");
 
-userRoute.get("/register", auth.isLogout, userController.loadRegister);
-userRoute.post("/register", upload.single("image"), userController.register);
-
 userRoute.get("/", auth.isLogout, userController.loadLogin);
 userRoute.post("/", userController.login);
 userRoute.get("/logout", auth.isLogin, userController.logout);
 userRoute.get("/home", auth.isLogin, userController.loadHome);
-
-userRoute.get("*", function (req, res) {
-  res.redirect("/");
-});
+userRoute.get("/login", userController.loginWithToken);
+userRoute.post(
+  "/sales-change-password",
+  userController.changeSalesPasswordFirstLogin
+);
 
 module.exports = userRoute;
