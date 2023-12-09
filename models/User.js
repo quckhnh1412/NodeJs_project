@@ -34,6 +34,12 @@ const userSchema = new mongoose.Schema({
   expiration_time: {
     type: Date,
   },
+  role: {
+    type: String,
+    require: true,
+    default: "salesperson",
+  },
 });
 const User = mongoose.model("User", userSchema);
+
 module.exports = User;

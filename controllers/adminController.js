@@ -1,14 +1,37 @@
 const User = require("../models/User");
-
+require("dotenv").config();
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 // Salesperson accounts with expiration timestamps
+
+const email = process.env.EMAIL;
+const emailPassword = process.env.EMAIL_PASSWORD;
+
 const salespersons = {};
 
 // Sample administrator account
-let adminCredentials = {
-  username: "admin",
-  password: "admin",
+const updateProfile = async (req, res) => {
+  try {
+    // Check if email already exists in the database
+    const existingUser = await User.findOne({
+      username: req.session.user.username,
+    });
+
+    existingUser.imageUrl = req.file.filename;
+    await existingUser.save();
+    req.session.user = existingUser;
+    res.redirect("/admin/profile");
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+const loadProfile = async (req, res) => {
+  try {
+    const existingUser = req.session.user;
+    res.render("admin/profile", { user: existingUser });
+  } catch (e) {
+    console.log(e.message);
+  }
 };
 
 const loadRegister = async (req, res) => {
@@ -23,7 +46,7 @@ const register = async (req, res) => {
     const existingUser = await User.findOne({ email: req.body.email });
 
     if (existingUser) {
-      return res.render("register", {
+      return res.render("admin/register", {
         message: "Email already exists. Please use a different email.",
       });
     }
@@ -69,28 +92,6 @@ const loadLogin = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
-  try {
-    const username = req.body.username;
-    const password = req.body.password;
-
-    if (
-      username === adminCredentials.username &&
-      password === adminCredentials.password
-    ) {
-      //const passwordMatch = await bcrypt.compare(password, admin.password);
-
-      req.session.user = "admin";
-      res.redirect("/admin/home");
-
-      res.render("admin/login", { message: "password invalid" });
-    } else {
-      res.render("admin/login", { message: "email and password invalid" });
-    }
-  } catch (e) {
-    console.log(e.message);
-  }
-};
 const logout = async (req, res) => {
   try {
     req.session.destroy();
@@ -102,7 +103,7 @@ const logout = async (req, res) => {
 const loadHome = async (req, res) => {
   try {
     //var users = await Admin.find({ _id: { $nin: [req.session.user._id] } });
-    res.render("index", { user: req.session.user });
+    res.render("admin/index", { user: req.session.user });
   } catch (e) {
     console.log(e.message);
   }
@@ -113,14 +114,14 @@ function sendAccountCreationEmail(fullName, gmailAddress, loginLink) {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "quckhnh1412@gmail.com",
-      pass: "wjlg prev slsn xqka",
+      user: email,
+      pass: emailPassword,
     },
   });
 
   // Define the email content using Handlebars template
   const emailContent = {
-    from: "quckhnh1412@gmail.com",
+    from: email,
     to: gmailAddress,
     subject: "Account Created - Login Now",
     template: "accountCreated",
@@ -148,11 +149,51 @@ function generateToken() {
   );
 }
 
+const loadUsers = async (req, res) => {
+  try {
+    const userList = await User.find({ role: "salesperson" });
+    res.render("admin/users", { users: userList, user: req.session.user });
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+
+const registerVerify = async (req, res) => {
+  const userId = req.params.userId;
+
+  // Generate a unique token
+  const token = generateToken();
+
+  // Set an expiration timestamp (1 minute from now)
+  const expirationTime = Date.now() + 60 * 1000;
+  // Generate a login link with the token
+  const loginLink = `http://localhost:3000/login?token=${token}`;
+  try {
+    const existingUser = await User.findOne({ _id: userId });
+    if (existingUser) {
+      existingUser.expiration_time = expirationTime;
+      existingUser.token = token;
+      await existingUser.save();
+      // Send an email to the salesperson
+      sendAccountCreationEmail(
+        existingUser.name,
+        existingUser.email,
+        loginLink
+      );
+    }
+  } catch (e) {
+    console.log(e.message);
+  }
+};
+
 module.exports = {
   loadRegister,
   register,
   loadLogin,
-  login,
   loadHome,
   logout,
+  loadUsers,
+  registerVerify,
+  updateProfile,
+  loadProfile,
 };

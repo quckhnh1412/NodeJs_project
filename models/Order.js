@@ -1,19 +1,33 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const orderItemSchema = new mongoose.Schema({
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
+const orderSchema = new Schema({
+  customer: {
+    type: Schema.Types.ObjectId,
+    ref: "Customer",
     required: true,
   },
-  quantity: { type: Number, required: true },
-  price: { type: Number, required: true },
-});
-
-const orderSchema = new mongoose.Schema({
-  orderCode: { type: String, required: true, unique: true },
-  totalAmount: { type: Number, required: true },
-  products: [orderItemSchema],
+  give: {
+    type: Number,
+    required: true,
+  },
+  payback: {
+    type: Number,
+    required: true,
+  },
+  totalBill: {
+    type: Number,
+    required: true,
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  creationDate: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const Order = mongoose.model("Order", orderSchema);

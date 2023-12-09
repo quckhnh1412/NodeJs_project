@@ -1,73 +1,124 @@
-const Product = require('../models/Product'); 
-
-const productController = {};
+const Product = require("../models/Product");
+const Category = require("../models/Category");
 
 // Hiển thị danh sách sản phẩm
-productController.list = async (req, res) => {
+const loadProductsList = async (req, res) => {
   try {
-    const products = await Product.find();
-    res.render('products/list', { products });
+    const products = await Product.find().populate("category");
+    const categories = await Category.find();
+
+    if (req.session.user.role === "admin") {
+      res.render("admin/products", {
+        products: products,
+        user: req.session.user,
+      });
+    } else {
+      res.render("salesProducts", {
+        products: products,
+        user: req.session.user,
+      });
+    }
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
 // Hiển thị trang tạo sản phẩm
-productController.createForm = (req, res) => {
-  res.render('products/create');
+const loadFromAddProduct = async (req, res) => {
+  const categories = await Category.find();
+  res.render("admin/addProduct", { categories });
 };
 
 // Xử lý tạo sản phẩm
-productController.create = async (req, res) => {
+const addProduct = async (req, res) => {
   try {
-    const { name, price, description } = req.body;
-    const product = new Product({ name, price, img, description });
+    const { barcode, productName, importPrice, retailPrice, category } =
+      req.body;
+    const product = new Product({
+      barcode,
+      productName,
+      importPrice,
+      retailPrice,
+      category,
+    });
     await product.save();
-    res.redirect('/products');
+    res.render("admin/addProduct", {
+      success: "Category added successfully",
+      user: req.session.user,
+    });
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
 // Hiển thị chi tiết sản phẩm
-productController.detail = async (req, res) => {
+const loadProductDetails = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    res.render('products/detail', { product });
+    const product = await Product.findById(req.params.id).populate("category");
+    if (req.session.user.role === "admin") {
+      res.render("admin/productDetails", {
+        product: product,
+        user: req.session.user,
+      });
+    } else {
+      res.render("productDetails", {
+        product: product,
+        user: req.session.user,
+      });
+    }
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
 // Hiển thị trang cập nhật sản phẩm
-productController.updateForm = async (req, res) => {
+const editProductForm = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    res.render('products/update', { product });
+    const product = await Product.findById(req.params.id).populate("category");
+    const categories = await Category.find();
+    res.render("admin/editProduct", {
+      product: product,
+      categories: categories,
+      user: req.session.user,
+    });
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
 // Xử lý cập nhật sản phẩm
-productController.update = async (req, res) => {
+const editProduct = async (req, res) => {
   try {
-    const { name, price, description } = req.body;
-    await Product.findByIdAndUpdate(req.params.id, { name, price, img, description });
-    res.redirect('/products');
+    const { barcode, productName, importPrice, retailPrice, category } =
+      req.body;
+    await Product.findByIdAndUpdate(req.params.id, {
+      barcode,
+      productName,
+      importPrice,
+      retailPrice,
+      category,
+    });
+    res.redirect("/admin/products");
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
 // Xử lý xoá sản phẩm
-productController.delete = async (req, res) => {
+const deleteProduct = async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
-    res.redirect('/products');
+    res.redirect("/products");
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
-module.exports = productController;
+module.exports = {
+  loadProductsList,
+  loadFromAddProduct,
+  addProduct,
+  editProductForm,
+  editProduct,
+  loadProductDetails,
+};

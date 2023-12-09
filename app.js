@@ -1,11 +1,14 @@
 // Import Express framework
 const express = require("express");
+const path = require("path");
 const exphbs = require("express-handlebars");
+const flash = require("express-flash");
 const app = express();
 const mongoose = require("mongoose");
 require("dotenv").config();
 const userRoute = require("./routes/userRoute");
 const adminRoute = require("./routes/adminRoute");
+
 mongoose.connect("mongodb://127.0.0.1:27017/final");
 // Set the view engine to EJS
 const hbs = exphbs.create({
@@ -18,6 +21,7 @@ app.engine("handlebars", hbs.engine);
 app.set("view engine", "handlebars");
 
 app.use(express.static(__dirname + "/public"));
+
 app.use("/", userRoute);
 app.use("/admin", adminRoute);
 

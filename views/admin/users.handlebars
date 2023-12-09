@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            width: 50px; /* Adjust the width as needed */
+            height: auto;
+            border-radius: 50%;
+        }
+                .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .actions a {
+            text-decoration: none;
+            color: #007bff;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Users</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Changed Password</th>
+                <th>Profile Image</th>
+                <th>Actions</th>
+                <!-- Add more columns as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {{#each users}}
+                <tr>
+                    <td>{{this.name}}</td>
+                    <td>{{this.email}}</td>
+                    <td>{{this.username}}</td>
+                    <td>{{this.status}}</td>
+                    <td>{{this.is_changed_password}}</td>
+                    <td>{{#if this.imageUrl}}<img src="images/avatar/{{this.imageUrl}}" alt="{{this.name}}">{{/if}}</td>
+                    <td class="actions">
+                        <a href="/admin/edit/{{this._id}}" title="Edit">Edit</a>
+                        <a href="/admin/resend-verify/{{this._id}}" title="Resend Verify Link">Resend Verify Link</a>
+                        <a href="/admin/view-sale-info/{{this._id}}" title="View Sale Info">View Sale Info</a>
+                    </td>
+                    <!-- Add more cells as needed -->
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <!-- ... (your existing body content) ... -->
+</body>
+</html>
