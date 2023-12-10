@@ -1,0 +1,28 @@
+[{
+  "_id": {
+    "$oid": "65711f4cb4ddc5cca5d63ffc"
+  },
+  "categoryName": "Smart Phone",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65711f843484ea7e1dc81949"
+  },
+  "categoryName": "Headphone",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6573349bed226e091e1fc1a9"
+  },
+  "categoryName": "Laptop",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65756d6712dd8b578f385775"
+  },
+  "categoryName": "Earpods",
+  "__v": 0
+}]

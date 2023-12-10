@@ -1,0 +1,48 @@
+[{
+  "_id": {
+    "$oid": "65709d7e6651b6677664de9d"
+  },
+  "name": "Bùi Quốc Khánh",
+  "email": "admin@gmail.com",
+  "username": "admin",
+  "password": "admin",
+  "imageUrl": "1702219993532-shein_mulvari.png",
+  "status": "Active",
+  "is_changed_password": true,
+  "token": null,
+  "expiration_time": null,
+  "role": "admin",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "65719cb4a9ede96ab67fa0fb"
+  },
+  "name": "Bùi Quốc Khánh",
+  "email": "quckhnh1301@gmail.com",
+  "username": "quckhnh1301",
+  "password": "Khanh1412",
+  "imageUrl": "1702210163629-shein_najma.png",
+  "status": "Active",
+  "is_changed_password": true,
+  "token": null,
+  "expiration_time": null,
+  "role": "salesperson",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6575d156dbaeb19eeb6b5f97"
+  },
+  "name": "Bùi Quốc Khánh",
+  "email": "quckhnh1412@gmail.com",
+  "username": "quckhnh1412",
+  "password": "Khanh",
+  "imageUrl": "1702220203138-adidas_white_pants.png",
+  "status": "Active",
+  "is_changed_password": true,
+  "token": null,
+  "expiration_time": null,
+  "role": "salesperson",
+  "__v": 0
+}]

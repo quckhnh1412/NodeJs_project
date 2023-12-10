@@ -1,0 +1,128 @@
+[{
+  "_id": {
+    "$oid": "657123257465e920fa55bb3e"
+  },
+  "barcode": "369854123",
+  "productName": "Iphone 14 Pro",
+  "importPrice": 1100,
+  "retailPrice": 1200,
+  "category": {
+    "$oid": "65711f4cb4ddc5cca5d63ffc"
+  },
+  "creationDate": {
+    "$date": "2023-12-07T01:43:01.350Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6571486b1972b67bf4b95ed6"
+  },
+  "barcode": "145236987",
+  "productName": "AirPods Max",
+  "importPrice": 540,
+  "retailPrice": 550,
+  "category": {
+    "$oid": "65711f843484ea7e1dc81949"
+  },
+  "creationDate": {
+    "$date": "2023-12-07T04:22:03.604Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "657551e98b10293d45553357"
+  },
+  "barcode": "1236542589",
+  "productName": "Macbook Air",
+  "importPrice": 2000,
+  "retailPrice": 2100,
+  "category": {
+    "$oid": "6573349bed226e091e1fc1a9"
+  },
+  "creationDate": {
+    "$date": "2023-12-10T05:51:37.981Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6575a4e4850bc2d342377b9b"
+  },
+  "barcode": "1589647135",
+  "productName": "iPhone 15 Pro",
+  "importPrice": 999,
+  "retailPrice": 1100,
+  "category": {
+    "$oid": "65711f4cb4ddc5cca5d63ffc"
+  },
+  "creationDate": {
+    "$date": "2023-12-10T11:45:40.681Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6575cb7a0fc4fdced6d9bfe4"
+  },
+  "barcode": "1236589741",
+  "productName": "AirPods Max",
+  "importPrice": 549,
+  "retailPrice": 555,
+  "category": {
+    "$oid": "65711f843484ea7e1dc81949"
+  },
+  "creationDate": {
+    "$date": "2023-12-10T14:30:18.616Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6575cc09dbaeb19eeb6b5eed"
+  },
+  "barcode": "136547892",
+  "productName": "Earbuds — Tidal Blue",
+  "importPrice": 199,
+  "retailPrice": 210,
+  "category": {
+    "$oid": "65756d6712dd8b578f385775"
+  },
+  "creationDate": {
+    "$date": "2023-12-10T14:32:41.153Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6575cc8bdbaeb19eeb6b5f05"
+  },
+  "barcode": "1254478963",
+  "productName": "Iphone 13",
+  "importPrice": 599,
+  "retailPrice": 615,
+  "category": {
+    "$oid": "65711f4cb4ddc5cca5d63ffc"
+  },
+  "creationDate": {
+    "$date": "2023-12-10T14:34:51.124Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6575d0b5dbaeb19eeb6b5f6c"
+  },
+  "barcode": "15896452331",
+  "productName": "Iphone 10 pro",
+  "importPrice": 600,
+  "retailPrice": 670,
+  "category": {
+    "$oid": "65711f4cb4ddc5cca5d63ffc"
+  },
+  "creationDate": {
+    "$date": "2023-12-10T14:52:37.172Z"
+  },
+  "__v": 0
+}]
