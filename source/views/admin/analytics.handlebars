@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Results</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            height: 100vh;
+            justify-content: center;
+        }
+
+        #container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        button {
+            background-color: #db34d3;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #ae2397;
+        }
+        
+        
+        #orderTable{
+            width: 100%;
+        }
+        #report {
+            background-color: #3498db;
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        p {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        #numberOfOrders {
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        #totalAmountReceived {
+            font-weight: bold;
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <h1>Sales Results</h1>
+
+        <button onclick="showToday()">Today</button>
+        <button onclick="showYesterday()">Yesterday</button>
+        <button onclick="showLast7Days()">Last 7 Days</button>
+        <button onclick="showThisMonth()">This Month</button>
+        <button onclick="showCustomDateRange()">Custom Date Range</button>
+
+        <div id="customDateRange" style="display: none;">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate">
+
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate">
+
+            <button onclick="showResults()">Show Results</button>
+        </div>
+
+        <!-- Display sales results here -->
+       
+
+    <div id="report">
+   <P>  NUMBER OF ORDER </P>  <p id="numberOfOrders"></p> 
+   <P>  TOTAL AMOUNT    <p id="totalAmountReceived"></p>
+</div>
+        
+    <table id="orderTable">
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Give</th>
+                <th>Payback</th>
+                <th>Total Bill</th>
+                <th>Created By</th>
+                <th>Creation Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="salesResults">
+            <!-- Orders will be dynamically added here -->
+        </tbody>
+    </table>
+    </div>
+
+    <script>
+        function showToday() {
+            // Logic to fetch and display sales results for today
+            document.getElementById("salesResults").innerHTML = "Showing results for today.";
+
+              // Get the current date
+            const currentDate = new Date().toISOString().split('T')[0];
+
+            // Fetch data using POST request
+            fetch('/admin/getAnalytic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ date: currentDate }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.totalAmountReceived ,data.numberOfOrders )
+                document.getElementById("totalAmountReceived").innerHTML = data.totalAmountReceived;
+                document.getElementById("numberOfOrders").innerHTML = data.numberOfOrders;
+                orders = data.Orders;
+                console.log(data)
+                // Display the results 
+                const result = document.getElementById("salesResults");
+                result.innerHTML = "";
+
+                orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.customer.name}</td>
+                    <td>${order.give}</td>
+                    <td>${order.payback}</td>
+                    <td>${order.totalBill}</td>
+                    <td>${order.createdBy.name}</td>
+                    <td>${formatDate(order.creationDate)}</td>
+                    <td><button onclick="showOrderDetails('${order._id}')">Details</button></td>
+                `;
+                result.appendChild(row);
+            });
+
+               
+               
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error.message);
+            });
+        }
+
+        function showYesterday() {
+  
+            const currentDate = new Date();
+            const yesterday = new Date(currentDate);
+            yesterday.setDate(currentDate.getDate() - 1);
+            const yesterdayDateString = yesterday.toISOString().split('T')[0];
+
+
+            // Fetch data using POST request
+            fetch('/admin/getAnalytic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ date: yesterdayDateString }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.totalAmountReceived ,data.numberOfOrders )
+                orders = data.Orders;
+                document.getElementById("totalAmountReceived").innerHTML = data.totalAmountReceived;
+                document.getElementById("numberOfOrders").innerHTML = data.numberOfOrders;
+                // Display the results 
+                const result = document.getElementById("salesResults");
+                result.innerHTML = "";
+
+                orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.customer.name}</td>
+                    <td>${order.give}</td>
+                    <td>${order.payback}</td>
+                    <td>${order.totalBill}</td>
+                    <td>${order.createdBy.name}</td>
+                    <td>${formatDate(order.creationDate)}</td>
+                    <td><button onclick="showOrderDetails('${order._id}')">Details</button></td>
+                `;
+                result.appendChild(row);
+            });
+
+               
+               
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error.message);
+            });
+        }
+
+        function showLast7Days() {
+           
+            // Fetch data using POST request
+            fetch('/admin/getAnalyticsLast7Days', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.totalAmountReceived ,data.numberOfOrders )
+                orders = data.Orders;
+                document.getElementById("totalAmountReceived").innerHTML = data.totalAmountReceived;
+                document.getElementById("numberOfOrders").innerHTML = data.numberOfOrders;
+                // Display the results 
+                const result = document.getElementById("salesResults");
+                result.innerHTML = "";
+
+                orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.customer.name}</td>
+                    <td>${order.give}</td>
+                    <td>${order.payback}</td>
+                    <td>${order.totalBill}</td>
+                    <td>${order.createdBy.name}</td>
+                    <td>${formatDate(order.creationDate)}</td>
+                    <td><button onclick="showOrderDetails('${order._id}')">Details</button></td>
+                `;
+                result.appendChild(row);
+            });
+
+               
+               
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error.message);
+            });
+        }
+
+        function showThisMonth() {
+            
+
+
+    
+            const currentDate = new Date();
+            const startOfMonth = new Date(Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), 1));
+            const endOfMonth = new Date(Date.UTC(currentDate.getFullYear(), currentDate.getMonth() + 1, 0));
+
+  
+            const startDateString = startOfMonth.toISOString();
+            const endDateString = endOfMonth.toISOString();
+
+
+            // Fetch data using POST request
+            fetch('/admin/getAnalyticMonth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    startDate: startOfMonth.toISOString(),
+                    endDate: endOfMonth.toISOString(),
+                }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data.totalAmountReceived, data.numberOfOrders);
+                    document.getElementById("totalAmountReceived").innerHTML = data.totalAmountReceived;
+                    document.getElementById("numberOfOrders").innerHTML = data.numberOfOrders;
+                    orders = data.Orders;
+                    console.log(data);
+
+                    // Display the results 
+                    const result = document.getElementById("salesResults");
+                    result.innerHTML = "";
+
+                    orders.forEach(order => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                                <td>${order.customer.name}</td>
+                                <td>${order.give}</td>
+                                <td>${order.payback}</td>
+                                <td>${order.totalBill}</td>
+                                <td>${order.createdBy.name}</td>
+                                <td>${formatDate(order.creationDate)}</td>
+                                <td><button onclick="showOrderDetails('${order._id}')">Details</button></td>
+                            `;
+                        result.appendChild(row);
+                    });
+
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error.message);
+                });
+        }
+
+       function showResults() {
+                const startDate = document.getElementById("startDate").value;
+                const endDate = document.getElementById("endDate").value;
+
+                // Fetch data for the custom date range using POST request
+                fetch('/admin/getAnalyticsCustomDateRange', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        startDate,
+                        endDate,
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                 .then(data => {
+                    console.log(data.totalAmountReceived, data.numberOfOrders);
+                    document.getElementById("totalAmountReceived").innerHTML = data.totalAmountReceived;
+                    document.getElementById("numberOfOrders").innerHTML = data.numberOfOrders;
+                    orders = data.Orders;
+                    console.log(data);
+
+                    // Display the results 
+                    const result = document.getElementById("salesResults");
+                    result.innerHTML = "";
+
+                    orders.forEach(order => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                                <td>${order.customer.name}</td>
+                                <td>${order.give}</td>
+                                <td>${order.payback}</td>
+                                <td>${order.totalBill}</td>
+                                <td>${order.createdBy.name}</td>
+                                <td>${formatDate(order.creationDate)}</td>
+                                <td><button onclick="showOrderDetails('${order._id}')">Details</button></td>
+                            `;
+                        result.appendChild(row);
+                    });
+
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error.message);
+                });
+            }
+      
+
+           function formatDate(dateString) {
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        };
+
+        // Parse the date string and format it
+        const formattedDate = new Date(dateString).toLocaleString('en-US', options);
+        return formattedDate;
+    }
+    function showCustomDateRange() {
+        // Display the custom date range form
+        document.getElementById("customDateRange").style.display = "block";
+    }
+    </script>
+</body>
+
+</html>

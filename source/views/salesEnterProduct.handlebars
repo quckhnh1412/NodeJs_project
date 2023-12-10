@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #container {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    #left-column, #right-column {
+      flex-basis: 48%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #a4b932;
+      color: rgb(38, 38, 38);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    #add-product-barcode {
+      padding: 10px 20px;
+      background-color: #af4c99;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    #add-product-barcode:hover {
+      background-color: rgb(129, 52, 114);
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    label {
+      margin-top: 10px;
+      display: block;
+    }
+
+    input[type="text"] {
+      width: 45%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 20px;
+    }
+
+    #name, #barcode {
+      margin-right: 20px;
+    }
+
+    #right-column {
+      margin-left: 20px;
+    }
+
+    #checkout {
+      padding: 10px 20px;
+      background-color: #2e4eb9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      margin-top:27px;
+      width: auto;
+      height: fit-content;
+      margin-left: 10px;
+
+    }
+
+
+    #checkout:hover {
+      background-color: rgb(44, 41, 145);
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="left-column">
+      <label for="name">Enter Product Name:</label>
+      <input type="text" id="name" name="name" placeholder="Enter product's name" oninput="searchProduct()">
+      <label for="barcode">Enter Product Barcode:</label>
+      <input type="text" id="barcode" name="barcode" placeholder="Enter product's barcode">
+      <button id="add-product-barcode" onclick="addProductBarcode()">Add product</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Barcode</th>
+            <th>Name</th>
+            <th>Unit Price</th>
+            <th>Category</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="product-info-body">
+          <!-- Product information will be dynamically added here -->
+        </tbody>
+      </table>
+    </div>
+
+    <div id="right-column">
+      <div>
+        <h2>Added Items</h2>
+        <table id="order-table">
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>Unit Price</th>
+              <th>Quantity</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="order-items-body">
+               {{#if cart}}
+                  {{#each cart}}
+                        <tr>
+                          <td>{{this.product.productName}}</td>
+                          <td>{{this.product.retailPrice}}</td>
+                          <td>{{this.quantity}}</td>
+                          <td>${{multiply this.product.retailPrice this.quantity}}</td>
+                            <td class="actions">
+                                    <button onclick="deleteFromCart('{{this.product._id}}')">Delete</button>
+                            </td>
+                        </tr>
+                  {{/each}}
+                {{/if}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <a id="checkout" href="/checkout">Checkout</a>
+  </div>
+
+  <script>
+    let temporaryOrderItems = [];
+
+    function addToTemporaryOrder(productId, productName, retailPrice, quantity) {
+      const existingItem = temporaryOrderItems.find(item => item.productId === productId);
+
+      if (existingItem) {
+        existingItem.quantity += quantity;
+        existingItem.total = existingItem.quantity * retailPrice;
+        addToCart(productId,quantity) // Update total based on the updated quantity
+      } else {
+        addToCart(productId,quantity);
+        const total = retailPrice * quantity;
+        temporaryOrderItems.push({ productId, productName, retailPrice, quantity, total });
+      }
+
+
+    }
+
+
+
+    async function searchProduct() {
+      const searchString = document.getElementById('name').value;
+
+      try {
+        const response = await fetch('/search-product', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ searchString }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        const productInfoBody = document.getElementById('product-info-body');
+        productInfoBody.innerHTML = ''; // Clear the table body
+
+        if (data.products && data.products.length > 0 ) {
+          // Update the table with the search results
+          data.products.forEach(product => {
+            productInfoBody.innerHTML += `
+              <tr>
+                <td>${product.barcode}</td>
+                <td>${product.productName}</td>
+                <td>$${product.retailPrice}</td>
+                <td>${product.category.categoryName}</td>
+                <td class="actions">
+                  <button onclick="addToTemporaryOrder('${product._id}','${product.productName}',${product.retailPrice},1)">Add</button>
+                </td>
+              </tr>
+            `;
+          });
+        } else {
+          console.log('No products found for the given search string.');
+        }
+      } catch (error) {
+        console.error('Error during product search:', error.message);
+      }
+    }
+    async function addProductBarcode(){
+      const barcode = document.getElementById('barcode').value;
+      try {
+        const response = await fetch('/search-product-barcode', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ barcode }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+
+        if (data.product) {
+          console.log(data.product);
+        addToTemporaryOrder(data.product._id, data.product.productName, data.product.retailPrice, 1)
+        } else {
+          console.log('No products found for the given search string.');
+        }
+      } catch (error) {
+        console.error('Error during product search:', error.message);
+      }
+    }
+
+    async function addProductBarcode(){
+      const barcode = document.getElementById('barcode').value;
+      try {
+        const response = await fetch('/search-product-barcode', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ barcode }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+
+        if (data.product) {
+          console.log(data.product);
+        addToTemporaryOrder(data.product._id, data.product.productName, data.product.retailPrice, 1)
+        } else {
+          console.log('No products found for the given search string.');
+        }
+      } catch (error) {
+        console.error('Error during product search:', error.message);
+      }
+    }
+
+
+    async function addToCart(productId,quantity){
+
+      try {
+        const response = await fetch('/add-to-cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId, quantity }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        updateCartTable(data.data)
+        console.log(data.data);
+      } catch (error) {
+        console.error('Error during product search:', error.message);
+      }
+    }
+
+    async function deleteFromCart(productId){
+
+      try {
+        const response = await fetch('/delete-from-cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId}),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        updateCartTable(data.data)
+       console.log(data.data);
+      } catch (error) {
+        console.error('Error during product search:', error.message);
+      }
+    }
+     // Assuming your data variable is named 'data'
+  const addedItemsTable = document.getElementById('addedItemsTable');
+  const addedItemsBody = document.getElementById('addedItemsBody');
+
+    function updateCartTable(data){
+      console.log(data.length);
+      const orderItemsBody = document.getElementById('order-items-body');
+            orderItemsBody.innerHTML = '';
+
+            for(let i = 0; i < data.length; i++){
+              const  quantity = data[i].quantity;
+              const product =  data[i].product;
+              const total = quantity * product.retailPrice;
+              console.log(total);
+              console.log(quantity);
+              console.log( product.productName);
+             
+                const row = document.createElement('tr');
+                      row.innerHTML = `
+                      <td>${product.barcode}</td>
+                        <td>${product.productName}</td>
+                        <td>${quantity}</td>
+                        <td>$ ${total}</td>
+                        <td class="actions">
+                          <button onclick="deleteFromCart('${product._id}')">Delete</button>
+                        </td>
+                      `;
+
+                      orderItemsBody.appendChild(row);
+              //orderItemsBody.appendChild(row);
+            }
+            
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Product</title>
+  <style>
+    #container {
+      font-family: 'Arial', sans-serif;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .details-container {
+      background-color: #f8f9fa; /* Light gray background */
+      padding: 30px;
+      border-radius: 10px; /* Slightly rounded corners */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #343a40; /* Dark gray text color */
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #495057; /* Dark gray label color */
+      font-weight: bold;
+    }
+
+    p {
+      margin: 0 0 15px;
+      color: #212529; /* Slightly darker text color */
+    }
+
+    button {
+      background-color: #dc3545; /* Red button color */
+      color: #fff;
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #c82333; /* Darker red on hover */
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div class="details-container">
+      <h1>Product Details</h1>
+      {{#if product}}
+        <label>Barcode:</label>
+        <p>{{product.barcode}}</p>
+
+        <label>Product Name:</label>
+        <p>{{product.productName}}</p>
+
+        <label>Retail Price:</label>
+        <p>{{product.retailPrice}}</p>
+
+        <label>Category:</label>
+        <p>{{product.category.categoryName}}</p>
+      {{/if}}
+    </div>
+  </div>
+</body>
+</html>

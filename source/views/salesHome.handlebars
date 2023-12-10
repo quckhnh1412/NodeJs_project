@@ -1,0 +1,330 @@
+<!-- Your HTML file -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+
+    #container {
+      display: flex;
+      width: 100%;
+      padding: 20px;
+    }
+
+    form {
+      margin-bottom: 20px;
+      width: 20%;
+    }
+
+    table {
+      width: 33%;
+      border-collapse: collapse;
+      height: fit-content;
+      margin-top: 20px;
+      margin-left: 20px;
+    }
+    #order-info {
+      width: 100%;
+      border-collapse: collapse;
+      height: fit-content;
+      margin-top: 20px;
+      margin-left: 20px;
+    }
+    
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #af4c7f;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #bfd448;
+    }
+    #customer-info {
+      list-style-type: none;
+      padding: 20px;
+      margin: 0;
+    }
+
+    #customer-info li {
+      margin-bottom: 10px;
+    }
+
+    #customer-info li a {
+      text-decoration: none;
+      color: #4caf50;
+    }
+  </style>
+</head>
+<body>
+    <div id="container">
+        <form action="/add-customer" method="post" id="save-order">
+    <label for="phone">Customer Phone:</label>
+    <input type="text" id="phone" name="phone" placeholder="Enter customer's phone number" oninput=" searchCustomers()" required>
+
+    <label for="name">Customer Name:</label>
+    <input type="text" id="name" name="name" placeholder="Enter customer's name" >
+
+    <label for="address">Customer Address:</label>
+    <input type="text" id="address" name="address" placeholder="Enter customer's address" >
+
+    <label for="money-give">Customer Give:</label>
+    <input type="text" id="money-give" name="moneygive" placeholder="Enter customer's money" oninput="calPaidBack()" required >
+
+    <label for="receive-back">Customer Receive Back:</label>
+    <input type="text" id="receive-back" name="receiveback" placeholder="customer receive-back"  value=""  >
+
+
+    <button type="submit">Save Order</button>
+
+    {{#if message}}
+      <p>{{message}}</p>
+    {{else}}
+      <!-- Nội dung sẽ được hiển thị nếu điều kiện sai -->
+    {{/if}}
+  </form>
+<table id="order-table">
+  <thead>
+    <tr>
+      <th>Product Name</th>
+      <th>Quantity</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody id="order-items-body">
+    <!-- Items will be dynamically added here -->
+    {{#if cart}}
+      {{#each cart}}
+        <tr>
+          <td>{{this.product.productName}}</td>
+          <td>{{this.quantity}}</td>
+          <td>${{multiply this.product.retailPrice this.quantity}}</td>
+        </tr>
+      {{/each}}
+      <tr>
+        <td colspan="2"><strong>Total:</strong></td>
+        <td>${{calculateTotalMoney cart}}</td>
+      </tr>
+    {{/if}}
+  </tbody>
+</table>
+  <div style="flex: auto;">
+    <ul id="customer-info">
+      {{#if customer}}
+        <li>
+          <strong>Name:</strong> {{customer.name}}
+        </li>
+        <li>
+          <strong>Phone:</strong> {{customer.phone}}
+        </li>
+        <li>
+          <strong>Address:</strong> {{customer.address}}
+        </li>
+        <li>
+          <a href="/customerHistory/{{this.customer._id}}">See Orders List</a>
+        </li>
+      {{/if}}
+
+    </ul>
+    
+      <table id="order-info">
+      </table>
+
+    </div>
+
+  </div>
+ 
+
+  <script>
+ 
+
+    async function searchCustomers() {
+      const phone = document.getElementById('phone').value;
+
+      try {
+        const response = await fetch('/check-customer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ phone }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        const ulElement = document.getElementById('order-info');
+        ulElement.innerHTML = "";
+        const customerInfoList = document.getElementById('customer-info');
+        customerInfoList.innerHTML = ''; // Clear the content of the list
+
+        if (data.customer) {
+          const listItems = [
+            `<strong>Name: </strong> ${data.customer.name}`,
+            `<strong>Phone: </strong> ${data.customer.phone}`,
+            `<strong>Address: </strong> ${data.customer.address}`,
+            `<strong>Date of purchase: </strong>`+getDateTime(),
+            `<button  onclick="historyOfPurchase('${data.customer._id}')">History of purchases<strong>`,
+
+          ];
+
+          listItems.forEach((item) => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = item;
+            customerInfoList.appendChild(listItem);
+          });
+        } else {
+          // Handle case where no customer is found
+          console.log('Customer not found');
+        }
+      } catch (error) {
+        console.error('Error during checkout:', error.message);
+      }
+    }
+ // Assuming you have a JavaScript function to calculate the total (as shown in the previous responses)
+  function calculateTotalMoney(cart) {
+    let total = 0;
+    for (const item of cart) {
+      total += item.quantity * item.product.retailPrice;
+    }
+    return total.toFixed(2); // Format the total to two decimal places
+  }
+
+  function calPaidBack() {
+    // Get the input values
+    const moneyGiveInput = document.getElementById('money-give');
+    const receiveBackInput = document.getElementById('receive-back');
+
+    // Get the total money spent from the cart
+    const totalMoney = parseFloat('{{#if cart}} {{calculateTotalMoney cart}}{{/if}}'); 
+
+    // Calculate the change to be given back to the customer
+    const moneyGive = parseFloat(moneyGiveInput.value) || 0; 
+    const change = moneyGive - totalMoney;
+
+    // Update the receive-back input with the calculated change
+    receiveBackInput.value = (change >= 0) ? change.toFixed(2) : ''; // Format the change to two decimal places or clear if negative
+  }
+  function getDateTime(){
+
+    const currentDate = new Date();
+
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1; // Month is zero-based, so add 1
+    const day = currentDate.getDate();
+    const hours = currentDate.getHours();
+    const minutes = currentDate.getMinutes();
+    const seconds = currentDate.getSeconds();
+
+ 
+    const formattedDateTime = `${year}-${month < 10 ? '0' + month : month}-${day < 10 ? '0' + day : day} ${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+
+    return formattedDateTime;
+  }
+
+async function historyOfPurchase(customerId) {
+  try {
+    const response = await fetch('/history-of-purchase', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ customerId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+
+    if (data.data != null) {
+      const orders = data.data;
+      if (orders.length > 0) {
+        // Create a new table element
+        const tableElement = document.getElementById('order-info');
+        tableElement.innerHTML = "";
+
+        // Create table header
+        const headerRow = tableElement.insertRow(0);
+        const headerCells = ['Total Bill', 'Give', 'Payback', 'Creation Date'];
+        headerCells.forEach((headerText, index) => {
+          const headerCell = headerRow.insertCell(index);
+          headerCell.textContent = headerText;
+        });
+
+        // Iterate over each order and create a row for each one
+        for (let i = 0; i < orders.length; i++) {
+          const order = orders[i];
+
+          const creationDate = new Date(order.creationDate);
+
+          const formattedDate = creationDate.toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          });
+
+          // Create a new row
+          const row = tableElement.insertRow(i + 1);
+
+          // Insert cells with order details
+          const cells = [
+            order.totalBill,
+            order.give,
+            order.payback,
+            formattedDate
+          ];
+
+          cells.forEach((cellData, index) => {
+            const cell = row.insertCell(index);
+            cell.textContent = cellData;
+          });
+        }
+      } else {
+        console.log(data);
+      }
+    }
+
+  } catch (error) {
+    console.error('Error during checkout:', error.message);
+  }
+}
+  </script>
+</body>
+</html>

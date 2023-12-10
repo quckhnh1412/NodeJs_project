@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <style>
+
+        #container {
+           font-family: 'Arial', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+   
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 500px;
+            padding: 8px;
+            margin: 3px 0 15px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #ff69b4; /* Pink color */
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 83%;
+        }
+
+        button:hover {
+            background-color: #ff1493; /* Darker pink on hover */
+        }
+
+        p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <h1 style="margin-right:50px">Add Product</h1>
+        {{#if error}}
+        <p style="color: red;">{{error}}</p>
+        {{else if success}}
+        <p style="color: green;">{{success}}</p>
+        {{/if}}
+        <form action="/admin/products/add" method="POST">
+            <label for="barcode">Barcode:</label>
+            <input type="text" id="barcode" name="barcode" required>
+
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" name="productName" required>
+
+            <label for="importPrice">Import Price:</label>
+            <input type="number" id="importPrice" name="importPrice" required>
+
+            <label for="retailPrice">Retail Price:</label>
+            <input type="number" id="retailPrice" name="retailPrice" required>
+
+            <label for="category">Category:</label>
+            <select id="category" name="category" required>
+                {{#each categories}}
+                <option value="{{this._id}}">{{this.categoryName}}</option>
+                {{/each}}
+            </select>
+
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
+</body>
+
+</html>
